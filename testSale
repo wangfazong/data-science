@@ -1,0 +1,144 @@
+#!/usr/bin/env python
+#coding=utf-8
+
+import pandas as pd
+from sklearn.feature_extraction import DictVectorizer
+from sklearn import preprocessing
+import numpy as np
+
+train = pd.read_csv("/Users/wangfazong/dataScience/Train_UWu5bXk.csv", header=0, error_bad_lines=False)
+test = pd.read_csv("/Users/wangfazong/dataScience/Test_u94Q5KV.csv", header=0, error_bad_lines=False)
+
+train['source'] = 'train'
+test['source'] = 'test'
+data = pd.concat([train, test], ignore_index=True)
+
+# print(data.apply(lambda x: sum(x.isnull())))
+# print(data.describe())
+# print(data.apply(lambda x: len(x.unique())))
+
+categorical_columns = [x for x in data.dtypes.index if data.dtypes[x] == 'object']
+
+categorical_columns = [x for x in categorical_columns if x not in ['Item_Identifier', 'Outlet_Identifier', 'source']]
+
+for col in categorical_columns:
+    print('\n frequ of cate for var %s ' %col)
+    print(data[col].value_counts())
+
+# print(categorical_columns)
+
+item_avg_weight= data.pivot_table(values = 'Item_Weight', index='Item_Identifier')
+
+print(item_avg_weight)
+miss_bool = data['Item_Weight'].isnull()
+data.loc[miss_bool, 'Item_Weight'] = data.loc[miss_bool,'Item_Identifier'].apply(lambda x: item_avg_weight[x])
+
+from scipy.stats import mode
+
+#Determing the mode for each
+print("before")
+miss_bool = data['Outlet_Size'].isnull()
+print(data['Outlet_Size'].head())
+print("----------")
+# data.loc[miss_bool,'Outlet_Size'] = 0
+
+
+li = data[['Outlet_Size','Outlet_Type']]
+print(li.head())
+print(li.dropna().head())
+outlet_size_mode = data.dropna(subset=['Outlet_Size']).pivot_table(values='Outlet_Size', columns='Outlet_Type',aggfunc=(lambda x:mode(x).mode[0]))
+print ('Mode for each Outlet_Type:')
+print (outlet_size_mode)
+
+#Get a boolean variable specifying missing Item_Weight values
+miss_bool = data['Outlet_Size'].isnull()
+
+#Impute data and check #missing values before and after imputation to confirm
+print('\nOrignal #missing: %d'% sum(miss_bool))
+data.loc[miss_bool,'Outlet_Size'] = data.loc[miss_bool,'Outlet_Type'].apply(lambda x: outlet_size_mode[x])
+print(sum(data['Outlet_Size'].isnull()))
+
+
+print(train.shape)
+print(data.shape)
+
+# print(data.head())
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# tmp = pd.DatetimeIndex(data['datetime'])
+# data['date'] = tmp.date
+# data['time'] = tmp.time
+# data['hour'] = pd.to_datetime(data.time, format='%H:%M:%S')
+# data['hour'] = pd.Index(data['hour']).hour
+#
+# data['dayofweek'] = pd.DatetimeIndex(data.date).dayofweek
+# data['dateDays'] = (data.date - data.date[0]).astype("timedelta64[D]")
+#
+#
+# byday=data.groupby('dayofweek')
+# byday['casual'].sum().reset_index()
+#
+# byday['registered'].sum().reset_index()
+# data['Saturday']=0
+# data.Saturday[data.dayofweek == 5]=1 #0表示没用到车，1表示用了
+#
+# data['Sunday']=0
+# data.Sunday[data.dayofweek==6]=1
+#
+# featureConCols = ['temp','atemp','humidity','windspeed','dateDays','hour']
+# dataFeatureCon = data[featureConCols]
+# print(dataFeatureCon)
+# dataFeatureCon = dataFeatureCon.fillna( 'NA' ) #in case I missed any
+# print("------")
+#
+# X_dictCon = dataFeatureCon.T.to_dict().values()
+#
+#
+# featureCatCols = ['season','holiday','workingday','weather','Saturday', 'Sunday']
+# dataFeatureCat = data[featureCatCols]
+# dataFeatureCat = dataFeatureCat.fillna( 'NA' ) #in case I missed any
+# X_dictCat = dataFeatureCat.T.to_dict().values()
+#
+# vec=DictVectorizer(sparse=False)
+# X_vec_cat=vec.fit_transform(X_dictCat)
+# X_v=vec.fit_transform(X_dictCon)
+# print(type(X_v))
+#
+# scaler = preprocessing.StandardScaler().fit(X_v)
+# X_vec_con_ed=scaler.transform(X_v)
+# print(X_vec_con_ed)
+# #对离散值进行one-hot编码
+# enc=preprocessing.OneHotEncoder()
+# enc.fit(X_vec_cat)
+# X_vec_cat_ed=enc.transform(X_vec_cat).toarray()
+#
+# print(X_vec_cat_ed)
+# #把离散特征和连续特征组合
+# X_vec=np.concatenate((X_vec_con_ed,X_vec_cat_ed),axis=1)
+#
+# # print (data.head())
