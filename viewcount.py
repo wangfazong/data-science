@@ -10,6 +10,14 @@ import re
 
 path = "/Users/wangfazong/dataScience/dataset/"
 
+holiday = pd.read_csv("holiday.csv")
+# 日期格式20170301->2017-03-01
+holiday['date'] = holiday['date'].apply(str).apply(parse)
+# index = False  不记录行号
+holiday.to_csv("holiday.csv",index=False , encoding='utf8')
+# 以index_col列的值做行索引
+air = pd.read_csv("alldata.csv", index_col="Date")
+
 #计算访问量
 # less_user_view = pd.read_table(path+"user_view.txt", sep=',', header=None, error_bad_lines=False)
 # extra_user_view = pd.read_table(path+"extra_user_view.txt", sep=',', header=None, error_bad_lines=False)
@@ -83,11 +91,11 @@ air = pd.read_csv(path+"air.csv", index_col="Date")
 # train.to_csv("train_modified.csv",index=False)
 # test.to_csv("test_modified.csv",index=False)
 
-# #按日期划分数据
-startDate=pd.to_datetime('2016-11-30')
-endDate=pd.to_datetime('2016-11-15')
-weather.index = pd.to_datetime(weather.index)
-weather = weather[(weather.index >= startDate)]
+# # #按日期划分数据
+# startDate=pd.to_datetime('2016-11-30')
+# endDate=pd.to_datetime('2016-11-15')
+# weather.index = pd.to_datetime(weather.index)
+# weather = weather[(weather.index >= startDate)]
 
 
 # print(weather.truncate(before='2016-11-02', after='2016-11-15'))
@@ -125,8 +133,8 @@ weather = weather[(weather.index >= startDate)]
 # view_with_other.to_csv(path+"order_click_info_with_other.csv",index=False , encoding='utf8')
 # print('-----end----')
 
-
-
+# #根据列的值选择
+# print(data.ix[data['服务策略名'] =='poidirect'])
 
 
 # user_view = pd.read_csv(path+"view.csv")
