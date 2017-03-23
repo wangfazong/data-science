@@ -1,5 +1,6 @@
-#!/usr/bin/env python
-#coding=utf-8
+#!/bin/python
+#!-*-coding: utf-8-*-
+
 
 import pandas as pd
 from sklearn.feature_extraction import DictVectorizer
@@ -59,3 +60,4 @@ print(X_vec_cat_ed)
 X_vec=np.concatenate((X_vec_con_ed,X_vec_cat_ed),axis=1)
 
 # print (data.head())
+
